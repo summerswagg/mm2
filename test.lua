@@ -1,11 +1,11 @@
--- Упрощенное меню для Roblox с функциями
+-- Улучшенное меню с вкладками для Roblox
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 -- Создаем GUI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "SimpleMenu"
+ScreenGui.Name = "AdvancedMenu"
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.Parent = game.CoreGui
 
@@ -13,8 +13,8 @@ local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 MainFrame.BorderSizePixel = 0
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -100)
-MainFrame.Size = UDim2.new(0, 300, 0, 200)
+MainFrame.Position = UDim2.new(0.5, -175, 0.5, -125)
+MainFrame.Size = UDim2.new(0, 350, 0, 250)
 MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
@@ -37,8 +37,8 @@ Title.BackgroundTransparency = 1
 Title.Position = UDim2.new(0, 10, 0, 0)
 Title.Size = UDim2.new(0.5, -10, 1, 0)
 Title.Font = Enum.Font.GothamSemibold
-Title.Text = "Simple Menu"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Text = "Delta Menu"
+Title.TextColor3 = Color3.fromRGB(0, 170, 255)
 Title.TextSize = 14
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
@@ -66,17 +66,107 @@ MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 MinimizeButton.TextSize = 14
 MinimizeButton.Parent = TopBar
 
--- Контейнер для контента
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Name = "ContentFrame"
-ContentFrame.BackgroundTransparency = 1
-ContentFrame.Position = UDim2.new(0, 10, 0, 40)
-ContentFrame.Size = UDim2.new(1, -20, 1, -50)
-ContentFrame.Parent = MainFrame
+-- Вкладки сбоку
+local TabButtonsFrame = Instance.new("Frame")
+TabButtonsFrame.Name = "TabButtons"
+TabButtonsFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+TabButtonsFrame.BorderSizePixel = 0
+TabButtonsFrame.Position = UDim2.new(0, 0, 0, 30)
+TabButtonsFrame.Size = UDim2.new(0, 80, 1, -30)
+TabButtonsFrame.Parent = MainFrame
 
 local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Padding = UDim.new(0, 10)
-UIListLayout.Parent = ContentFrame
+UIListLayout.Padding = UDim.new(0, 5)
+UIListLayout.Parent = TabButtonsFrame
+
+-- Контейнер для контента вкладок
+local TabContentFrame = Instance.new("Frame")
+TabContentFrame.Name = "TabContent"
+TabContentFrame.BackgroundTransparency = 1
+TabContentFrame.Position = UDim2.new(0, 85, 0, 35)
+TabContentFrame.Size = UDim2.new(1, -90, 1, -40)
+TabContentFrame.Parent = MainFrame
+
+local ContentListLayout = Instance.new("UIListLayout")
+ContentListLayout.Padding = UDim.new(0, 10)
+ContentListLayout.Parent = TabContentFrame
+
+-- Создаем вкладки
+local Tabs = {
+    ESP = {
+        Button = Instance.new("TextButton"),
+        Content = Instance.new("ScrollingFrame")
+    },
+    MOVEMENT = {
+        Button = Instance.new("TextButton"),
+        Content = Instance.new("ScrollingFrame")
+    },
+    AIMBOT = {
+        Button = Instance.new("TextButton"),
+        Content = Instance.new("ScrollingFrame")
+    },
+    SETTINGS = {
+        Button = Instance.new("TextButton"),
+        Content = Instance.new("ScrollingFrame")
+    }
+}
+
+-- Функция создания вкладки
+local function CreateTab(tabName)
+    local tab = Tabs[tabName]
+    
+    -- Кнопка вкладки
+    tab.Button.Name = tabName.."Tab"
+    tab.Button.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+    tab.Button.BackgroundTransparency = 0.5
+    tab.Button.Size = UDim2.new(1, -10, 0, 30)
+    tab.Button.Position = UDim2.new(0, 5, 0, 5)
+    tab.Button.Font = Enum.Font.GothamMedium
+    tab.Button.Text = tabName
+    tab.Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tab.Button.TextSize = 12
+    tab.Button.Parent = TabButtonsFrame
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 4)
+    corner.Parent = tab.Button
+    
+    -- Контент вкладки
+    tab.Content.Name = tabName.."Content"
+    tab.Content.BackgroundTransparency = 1
+    tab.Content.Size = UDim2.new(1, 0, 1, 0)
+    tab.Content.Visible = false
+    tab.Content.ScrollBarThickness = 3
+    tab.Content.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255)
+    tab.Content.CanvasSize = UDim2.new(0, 0, 0, 0)
+    tab.Content.Parent = TabContentFrame
+    
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 10)
+    layout.Parent = tab.Content
+    
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        tab.Content.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+    end)
+    
+    tab.Button.MouseButton1Click:Connect(function()
+        for name, t in pairs(Tabs) do
+            t.Content.Visible = false
+            t.Button.BackgroundTransparency = 0.5
+        end
+        tab.Content.Visible = true
+        tab.Button.BackgroundTransparency = 0
+    end)
+end
+
+-- Создаем все вкладки
+for tabName, _ in pairs(Tabs) do
+    CreateTab(tabName)
+end
+
+-- Активируем первую вкладку
+Tabs.ESP.Content.Visible = true
+Tabs.ESP.Button.BackgroundTransparency = 0
 
 -- Функции для элементов меню
 local function CreateButton(parent, text, callback)
@@ -217,33 +307,64 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Пример добавления функциональных элементов
-CreateButton(ContentFrame, "Телепорт в спавн", function()
-    local player = game.Players.LocalPlayer
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
-    end
+-- Добавляем функционал на вкладки
+
+-- Вкладка ESP
+local ESPToggle = CreateToggle(Tabs.ESP.Content, "ESP Игроков", false, function(state)
+    -- Здесь будет код ESP
+    print("ESP:", state)
 end)
 
-local SpeedToggle = CreateToggle(ContentFrame, "Скорость x2", false, function(state)
+local ESPBoxToggle = CreateToggle(Tabs.ESP.Content, "Показывать рамки", false, function(state)
+    print("ESP Boxes:", state)
+end)
+
+local ESPNamesToggle = CreateToggle(Tabs.ESP.Content, "Показывать имена", true, function(state)
+    print("ESP Names:", state)
+end)
+
+-- Вкладка MOVEMENT
+local SpeedToggle = CreateToggle(Tabs.MOVEMENT.Content, "Скорость x2", false, function(state)
     local player = game.Players.LocalPlayer
     if player.Character and player.Character:FindFirstChild("Humanoid") then
         player.Character.Humanoid.WalkSpeed = state and 32 or 16
     end
 end)
 
-local JumpToggle = CreateToggle(ContentFrame, "Высокий прыжок", false, function(state)
+local JumpToggle = CreateToggle(Tabs.MOVEMENT.Content, "Высокий прыжок", false, function(state)
     local player = game.Players.LocalPlayer
     if player.Character and player.Character:FindFirstChild("Humanoid") then
         player.Character.Humanoid.JumpPower = state and 100 or 50
     end
 end)
 
-CreateButton(ContentFrame, "Удалить инструменты", function()
-    local player = game.Players.LocalPlayer
-    for _, tool in ipairs(player.Backpack:GetChildren()) do
-        if tool:IsA("Tool") then
-            tool:Destroy()
-        end
-    end
+local NoclipToggle = CreateToggle(Tabs.MOVEMENT.Content, "Режим Noclip", false, function(state)
+    print("Noclip:", state)
+    -- Здесь будет код Noclip
+end)
+
+-- Вкладка AIMBOT
+local AimbotToggle = CreateToggle(Tabs.AIMBOT.Content, "Включить Aimbot", false, function(state)
+    print("Aimbot:", state)
+end)
+
+local SmoothnessSlider = CreateToggle(Tabs.AIMBOT.Content, "Плавность прицела", false, function(state)
+    print("Smoothness:", state)
+end)
+
+local FOVToggle = CreateToggle(Tabs.AIMBOT.Content, "Показывать FOV", true, function(state)
+    print("Show FOV:", state)
+end)
+
+-- Вкладка SETTINGS
+CreateButton(Tabs.SETTINGS.Content, "Сменить тему", function()
+    print("Тема изменена")
+end)
+
+CreateButton(Tabs.SETTINGS.Content, "Сбросить настройки", function()
+    print("Настройки сброшены")
+end)
+
+local WatermarkToggle = CreateToggle(Tabs.SETTINGS.Content, "Водяной знак", true, function(state)
+    print("Watermark:", state)
 end)
